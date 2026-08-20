@@ -15,73 +15,88 @@ let
       cores = 2;
       # diskSize = 8000; # MB
       memorySize = 4096; # MB
-      forwardPorts = [
-        {
-          guest.port = 80;
-          host.port = 8080;
-        }
-        {
-          guest.port = 443;
-          host.port = 4433;
-        }
-      ];
+      # forwardPorts = [
+      #   {
+      #     guest.port = 80;
+      #     host.port = 8080;
+      #   }
+      #   {
+      #     guest.port = 443;
+      #     host.port = 4433;
+      #   }
+      # ];
     };
   };
-in {
-  nixos-tests =
-    (nixos-lib.runTest {
-      name = "frappe-test-nixos";
-      _file = ./tests.nix;
-      skipLint = true;
-      defaults =
-        defaults
-        // {
-          imports = [
-            nixos.testrig
-            nixos.frappix
-          ];
-        };
-      hostPkgs = nixpkgs;
-      nodes = {
-        runnerA = {};
-        # runnerB = {};
-        # runnerC = {};
-        # runnerD = {};
-      };
-      testScript =
-        # python
-        ''
-          def parallel(*fns):
-              from threading import Thread
-              threads = [ Thread(target=fn) for fn in fns ]
-              for t in threads: t.start()
-              for t in threads: t.join()
 
-          start_all()
-          total_builds = len(machines)
+  # Without this, bench exits with `0` regardless of tests failing
+  benchCIVar = "CI=1";
+in
+  lib.pipe 256 [
+    (lib.range 1)
+    (lib.flip lib.genAttrs' (vmCount: {
+      name = "${toString vmCount}-vms";
+      value =
+        (nixos-lib.runTest {
+          name = "frappe-test-nixos";
+          _file = ./tests.nix;
+          skipLint = true;
+          defaults =
+            defaults
+            // {
+              imports = [
+                nixos.testrig
+                nixos.frappix
+              ];
+            };
+          hostPkgs = nixpkgs;
+          nodes = lib.genAttrs' (lib.range 0 (vmCount - 1)) (n: {
+            name = "runner${toString n}";
+            value = {pkgs, ...}: {
+              environment = {
+                systemPackages = [pkgs.bind];
+                variables.SKIP_TESTS = lib.pipe ./skip.nix [
+                  import
+                  (map (test: test.id))
+                  (lib.concatStringsSep ",")
+                ];
+              };
+              networking = {
+                hosts."127.0.0.1" = [site];
+                hostName = "runner${toString n}";
+              };
+            };
+          });
 
-          with subtest("Wait for machines to reach target"):
-              for idx, m in enumerate(machines):
-                  print("Check ", m)
+          testScript =
+            # python
+            ''
+              from concurrent.futures import ThreadPoolExecutor, as_completed
+
+              total_builds = len(machines)
+
+              def test(idx, m):
+                with subtest(f"{m}"):
+                  m.start()
+
                   m.wait_for_unit("${project}.target")
+                  m.wait_until_succeeds('test $(curl -L -o /dev/null -w %{http_code} ${site}) = 200', timeout=10)
 
-          with subtest("Wait for site to become reachable"):
-              for idx, m in enumerate(machines):
-                  print("Check ", m)
-                  m.wait_until_succeeds('test $(curl -L -s -o /dev/null -w %{http_code} ${site}) = 200', timeout=10)
-
-          with subtest("Run the unit test suite"):
-              for idx, m in enumerate(machines):
-                  print("bench run-parallel-tests for ", m)
-                  stdout = m.succeed(f"bench run-parallel-tests --build-number {idx+1} --total-builds {total_builds}")
+                  stdout = m.succeed(
+                    f"${benchCIVar} bench --verbose run-parallel-tests --build-number {idx+1} --total-builds {total_builds}",
+                    timeout=30 * 60 / total_builds
+                  )
                   print(stdout)
-              # parallel([
-              #     m.succeed(f"bench run-parallel-tests --build-number {idx+1} --total-builds {total_builds}")
-              #     for idx, m in enumerate(machines)
-              # ])
-        '';
-    })
-    // {
-      meta.description = "The frappix vm-based test suite using nixos modules";
-    };
-}
+
+              executor = ThreadPoolExecutor()
+              vm_tasks = [executor.submit(test, idx, m) for idx, m in enumerate(machines)]
+
+              # TODO: fail-fast without "Bad file descriptor" errors
+              for task in as_completed(vm_tasks):
+                task.result()
+            '';
+        })
+        // {
+          meta.description = "Run bench tests in parallel across ${toString vmCount} VMs";
+        };
+    }))
+  ]

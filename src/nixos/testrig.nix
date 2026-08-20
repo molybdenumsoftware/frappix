@@ -1,10 +1,9 @@
 let
   project = "TestProject";
   sslPath = "/etc/nginx/ssl";
-  # minica --domains '*.frx.localhost,frx.localhost'
-  ca = ./test-ca.pem;
-  cert = ./test-cert.pem;
-  key = ./test-key.pem;
+  ca = ./minica.pem;
+  cert = ./testproject.local/cert.pem;
+  key = ./testproject.local/key.pem;
 in
   {
     lib,
@@ -34,28 +33,28 @@ in
         memorySize = 4096;
         cores = 2;
         graphics = false;
-        forwardPorts = [
-          {
-            guest.port = 80;
-            host.port = 80;
-          }
-          {
-            guest.port = 443;
-            host.port = 443;
-          }
-        ];
+        # forwardPorts = [
+        #   {
+        #     guest.port = 80;
+        #     host.port = 80;
+        #   }
+        #   {
+        #     guest.port = 443;
+        #     host.port = 443;
+        #   }
+        # ];
       };
       users.mutableUsers = false;
       networking = {
         firewall.enable = false;
         # chrome and other browsers don't show a warning screen for self signed certs on localhost
         domain = mkTestOverride "frx.localhost";
-        hostName = mkTestOverride "testhost";
+        # hostName = mkTestOverride "testhost";
         # workarround
-        hosts = mkTestOverride {
-          # "127.0.0.1" = ["frx.localhost" "localhost"];
-          # "::1" = ["frx.localhost" "localhost"];
-        };
+        # hosts = mkTestOverride {
+        #   # "127.0.0.1" = ["frx.localhost" "localhost"];
+        #   # "::1" = ["frx.localhost" "localhost"];
+        # };
       };
       security.acme.acceptTerms = mkTestOverride false;
       # setup a complete bench environment at the system level
@@ -65,11 +64,16 @@ in
           # when the testing backdoor service enters the environment, the frappe systemd services
           # havn't emplaced this folders yet so we create it manually for the linking below
           mkdir -p ${cfg.benchDirectory}/sites
+          # export BENCH_DIRECTORY=${cfg.benchDirectory}
+          # export COMBINED_ASSETS=${cfg.combinedAssets}
           # required also outside the systemd chroot for test runner command to discover assets via the file system
+          rmdir ${cfg.benchDirectory}/sites/assets
           ln -sf ${cfg.combinedAssets}/share/sites/assets   ${cfg.benchDirectory}/sites
           # required also outside the systemd chroot for test runner command to discover apps that are set-up in this environment
+          rm ${cfg.benchDirectory}/sites/apps.txt
           ln -sf ${cfg.combinedAssets}/share/sites/apps.txt ${cfg.benchDirectory}/sites/apps.txt
           # required also outside the systemd chroot for test runner command to discover apps sources
+          rmdir ${cfg.benchDirectory}/apps
           ln -sf ${cfg.combinedAssets}/share/apps           ${cfg.benchDirectory}
         '';
       };

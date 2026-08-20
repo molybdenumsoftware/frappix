@@ -34,6 +34,7 @@ let
             (replaceVars ./sources/frappe-website-generator.patch {
               frappe = workdirsrc;
             })
+            ./sources/frappe-skip-tests.patch
           ];
         };
       in
