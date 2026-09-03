@@ -14768,4 +14768,34 @@
     #     signature = <function signature at 0x7ffff6ecca40>
     # AttributeError: 'NoneType' object has no attribute 'append'
   }
+  {
+    id = "frappe.desk.doctype.bulk_update.test_bulk_update.TestBulkUpdate.test_bulk_submit_in_background";
+    # ----------------------------------------------------------------------
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/desk/doctype/bulk_update/test_bulk_update.py", line 44, in test_bulk_submit_in_background
+    #     self.wait_for_assertion(lambda: check_docstatus(unsubmitted, 1))
+    #     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #     check_docstatus = <function TestBulkUpdate.test_bulk_submit_in_background.<locals>.check_docstatus at 0x7fffef8ac3b0>
+    #     failed = []
+    #     self = <frappe.desk.doctype.bulk_update.test_bulk_update.TestBulkUpdate testMethod=test_bulk_submit_in_background>
+    #     unsubmitted = ['btkt9nvlr6', 'btkel0emj9', 'btk2rfocga', 'btkgm4mhca', 'btkaks22ch', 'btkhnsfo12', 'btkdrh1uv9', 'btk114v1uv', 'btkf63ff1n', 'btksf39ms8', 'btki4sdk5l', 'btk5vqkmno', 'btk74ctu8e', 'btkv6lgo>
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 368, in wrapper
+    #     result = func(*args, **kwargs)
+    #     _handle_timeout = <function timeout.<locals>.decorator.<locals>._handle_timeout at 0x7fffefb343b0>
+    #     actual_timeout = 30
+    #     args = (<frappe.desk.doctype.bulk_update.test_bulk_update.TestBulkUpdate testMethod=test_bulk_submit_in_background>, <function TestBulkUpdate.test_bulk_submit_in_background.<locals>.<lambda> at 0x7fffef8ac0>
+    #     func = <function TestBulkUpdate.wait_for_assertion at 0x7fffefb34bf0>
+    #     kwargs = {}
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/desk/doctype/bulk_update/test_bulk_update.py", line 27, in wait_for_assertion
+    #     time.sleep(0.2)
+    #     ~~~~~~~~~~^^^^^
+    #     assertion = <function TestBulkUpdate.test_bulk_submit_in_background.<locals>.<lambda> at 0x7fffef8ac040>
+    #     self = <frappe.desk.doctype.bulk_update.test_bulk_update.TestBulkUpdate testMethod=test_bulk_submit_in_background>
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 362, in _handle_timeout
+    #     raise Exception(actual_error_message)
+    #     actual_error_message = 'Test timed out.'
+    #     frame = <frame at 0x7fffef840fb0, file '/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/desk/doctype/bulk_update/test_bulk_update.py', line 27, code wait_f>
+    #     signum = 14
+    # Exception: Test timed out.
+  }
 ]
