@@ -14798,4 +14798,122 @@
     #     signum = 14
     # Exception: Test timed out.
   }
+  {
+    id = "frappe.core.doctype.rq_job.test_rq_job.TestRQJob.test_multi_queue_burst_consumption_worker_pool";
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 368, in wrapper
+    #     result = func(*args, **kwargs)
+    #     _handle_timeout = <function timeout.<locals>.decorator.<locals>._handle_timeout at 0x7ffee1ef78a0>
+    #     actual_timeout = 30
+    #     args = (<frappe.core.doctype.rq_job.test_rq_job.TestRQJob testMethod=test_multi_queue_burst_consumption_worker_pool>,)
+    #     func = <function TestRQJob.test_multi_queue_burst_consumption_worker_pool at 0x7ffee1ef75e0>
+    #     kwargs = {}
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_job/test_rq_job.py", line 114, in test_multi_queue_burst_consumption_worker_pool
+    #     _, stderr = execute_in_shell(
+    #                 ~~~~~~~~~~~~~~~~^
+    #           "bench worker-pool --queue short,default --burst --num-workers=4", check_exit_code=True
+    #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #     )
+    #     ^
+    #     _ = 2
+    #     q = 'short'
+    #     self = <frappe.core.doctype.rq_job.test_rq_job.TestRQJob testMethod=test_multi_queue_burst_consumption_worker_pool>
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/utils/__init__.py", line 505, in execute_in_shell
+    #     exit_code = p.wait()
+    #     Popen = <class 'subprocess.Popen'>
+    #     check_exit_code = True
+    #     cmd = 'bench worker-pool --queue short,default --burst --num-workers=4'
+    #     kwargs = {'shell': True, 'stdout': <_io.BufferedRandom name=7>, 'stderr': <_io.BufferedRandom name=8>, 'executable': '/run/current-system/sw/bin/bash'}
+    #     low_priority = False
+    #     p = <Popen: returncode: None args: 'bench worker-pool --queue short,default --bu...>
+    #     shlex = <module 'shlex' from '/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/shlex.py'>
+    #     stderr = <_io.BufferedRandom name=8>
+    #     stdout = <_io.BufferedRandom name=7>
+    #     tempfile = <module 'tempfile' from '/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/tempfile.py'>
+    #     verbose = False
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/subprocess.py", line 1279, in wait
+    #     return self._wait(timeout=timeout)
+    #            ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+    #     self = <Popen: returncode: None args: 'bench worker-pool --queue short,default --bu...>
+    #     timeout = None
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/subprocess.py", line 2084, in _wait
+    #     (pid, sts) = self._try_wait(0)
+    #                  ~~~~~~~~~~~~~~^^^
+    #     self = <Popen: returncode: None args: 'bench worker-pool --queue short,default --bu...>
+    #     timeout = None
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/subprocess.py", line 2042, in _try_wait
+    #     (pid, sts) = os.waitpid(self.pid, wait_flags)
+    #                  ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+    #     self = <Popen: returncode: None args: 'bench worker-pool --queue short,default --bu...>
+    #     wait_flags = 0
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 362, in _handle_timeout
+    #     raise Exception(actual_error_message)
+    #     actual_error_message = 'Test timed out'
+    #     frame = <frame at 0x7ffeeb69e7a0, file '/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/subprocess.py', line 2043, code _try_wait>
+    #     signum = 14
+    # Exception: Test timed out
+  }
+  {
+    id = "frappe.tests.test_safe_exec.TestNoSafeExec.test_safe_exec_disabled_by_default";
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/test_safe_exec.py", line 141, in test_safe_exec_disabled_by_default
+    #     self.assertRaises(ServerScriptNotEnabled, safe_exec, "pass")
+    #     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #     self = <frappe.tests.test_safe_exec.TestNoSafeExec testMethod=test_safe_exec_disabled_by_default>
+    # AssertionError: ServerScriptNotEnabled not raised by safe_exec
+  }
+  {
+    id = "frappe.tests.test_commands.TestBackups.test_backup_excluding_specific_doctypes";
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/test_commands.py", line 710, in test_backup_excluding_specific_doctypes
+    #     self.assertFalse(exists_in_backup(self.backup_map["excludes"]["excludes"], database))
+    #     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #     database = './runner4/private/backups/20260903_112329-runner4-database.sql.gz'
+    #     self = <frappe.tests.test_commands.TestBackups testMethod=test_backup_excluding_specific_doctypes>
+    # AssertionError: True is not false
+  }
+  {
+    id = "frappe.core.doctype.rq_job.test_rq_job.TestRQJob.test_serialization";
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_job/test_rq_job.py", line 54, in test_serialization
+    #     self.check_status(job, "finished")
+    #     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+    #     job = Job('runner1::7a9785c9-acfa-48f7-b474-b15cfc260091', enqueued_at=datetime.datetime(2026, 9, 3, 15, 31, 43, 980078))
+    #     rq_job = <RQJob: runner1::7a9785c9-acfa-48f7-b474-b15cfc260091>
+    #     self = <frappe.core.doctype.rq_job.test_rq_job.TestRQJob testMethod=test_serialization>
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_job/test_rq_job.py", line 37, in check_status
+    #     wait_for_completion(job)
+    #     ~~~~~~~~~~~~~~~~~~~^^^^^
+    #     job = Job('runner1::7a9785c9-acfa-48f7-b474-b15cfc260091', enqueued_at=datetime.datetime(2026, 9, 3, 15, 31, 43, 980078))
+    #     self = <frappe.core.doctype.rq_job.test_rq_job.TestRQJob testMethod=test_serialization>
+    #     status = 'finished'
+    #     wait = True
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 368, in wrapper
+    #     result = func(*args, **kwargs)
+    #     _handle_timeout = <function timeout.<locals>.decorator.<locals>._handle_timeout at 0x7fffe4c8eb90>
+    #     actual_timeout = 60
+    #     args = (Job('runner1::7a9785c9-acfa-48f7-b474-b15cfc260091', enqueued_at=datetime.datetime(2026, 9, 3, 15, 31, 43, 980078)),)
+    #     func = <function wait_for_completion at 0x7fffe4c8e090>
+    #     kwargs = {}
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_job/test_rq_job.py", line 23, in wait_for_completion
+    #     time.sleep(0.2)
+    #     ~~~~~~~~~~^^^^^
+    #     job = Job('runner1::7a9785c9-acfa-48f7-b474-b15cfc260091', enqueued_at=datetime.datetime(2026, 9, 3, 15, 31, 43, 980078))
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/tests/utils.py", line 362, in _handle_timeout
+    #     raise Exception(actual_error_message)
+    #     actual_error_message = 'Test timed out.'
+    #     frame = <frame at 0x7fffe4d3bac0, file '/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_job/test_rq_job.py', line 23, code wait_for_completion>
+    #     signum = 14
+    # Exception: Test timed out.
+  }
+  {
+    id = "frappe.core.doctype.rq_worker.test_rq_worker.TestRQWorker.test_get_worker_list";
+    # Traceback (most recent call last):
+    #   File "/nix/store/6jbngjwsrj1rkyyrgrnjrdpy635rsp12-python3-3.14.7-env/lib/python3.14/site-packages/frappe/core/doctype/rq_worker/test_rq_worker.py", line 13, in test_get_worker_list
+    #     self.assertTrue(any("short" in w.queue_type for w in workers))
+    #     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #     self = <frappe.core.doctype.rq_worker.test_rq_worker.TestRQWorker testMethod=test_get_worker_list>
+    #     workers = [{'name': '88a26c3ad1af45b385d870b8643fe915', 'queue': 'var-lib-TestProject:long', 'queue_type': 'long', 'worker_name': '88a26c3ad1af45b385d870b8643fe915', 'status': 'idle', 'pid': 419, 'current_job_id': None, 'last_heartbeat': datetime.datetime(2026, 9, 3, 11, 31, 32, 19305, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'birth_date': datetime.datetime(2026, 9, 3, 11, 30, 56, 901286, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'successful_job_count': 3, 'failed_job_count': 1, 'total_working_time': 4.227331, '_comment_count': 0, 'modified': datetime.datetime(2026, 9, 3, 11, 31, 32, 19305, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'creation': datetime.datetime(2026, 9, 3, 11, 30, 56, 901286, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'utilization_percent': 3.9473117074316937}, {'name': '63cc4d4a38e949a0b23233bf460e11a6', 'queue': 'var-lib-TestProject:default', 'queue_type': 'default', 'worker_name': '63cc4d4a38e949a0b23233bf460e11a6', 'status': 'idle', 'pid': 417, 'current_job_id': None, 'last_heartbeat': datetime.datetime(2026, 9, 3, 11, 31, 43, 815131, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'birth_date': datetime.datetime(2026, 9, 3, 11, 30, 56, 946707, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'successful_job_count': 5, 'failed_job_count': 1, 'total_working_time': 8.539299, '_comment_count': 0, 'modified': datetime.datetime(2026, 9, 3, 11, 31, 43, 815131, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'creation': datetime.datetime(2026, 9, 3, 11, 30, 56, 946707, tzinfo=<DstTzInfo 'America/New_York' EDT-1 day, 20:00:00 DST>), 'utilization_percent': 7.977033114476581}]
+    # AssertionError: False is not true
+  }
 ]
