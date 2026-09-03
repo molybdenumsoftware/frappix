@@ -3,100 +3,204 @@ let
   inherit (inputs.cells.src) pkgs nixos;
   inherit (inputs.nixpkgs) lib;
 
-  site = "testproject.local";
   project = "TestProject";
   nixos-lib = import (nixpkgs + /nixos/lib) {inherit (nixpkgs) system;};
 
-  defaults = {
-    nixpkgs = {inherit pkgs;};
-    virtualisation = {
-      # we don't do any nix build inside the test vm
-      writableStore = false;
-      cores = 2;
-      # diskSize = 8000; # MB
-      memorySize = 4096; # MB
-      # forwardPorts = [
-      #   {
-      #     guest.port = 80;
-      #     host.port = 8080;
-      #   }
-      #   {
-      #     guest.port = 443;
-      #     host.port = 4433;
-      #   }
-      # ];
-    };
-  };
+  test-certificates = pkgs.runCommandLocal "test-certificates" {} ''
+    mkdir -p $out
+    echo insecure-root-password > $out/root-password-file
+    echo insecure-intermediate-password > $out/intermediate-password-file
+    ${lib.getExe pkgs.step-cli} certificate create "Root CA" $out/root_ca.crt $out/root_ca.key \
+      --password-file=$out/root-password-file --profile root-ca
+    ${lib.getExe pkgs.step-cli} certificate create "Intermediate CA" \
+      $out/intermediate_ca.crt $out/intermediate_ca.key \
+      --password-file=$out/intermediate-password-file --ca-password-file=$out/root-password-file \
+      --profile intermediate-ca --ca $out/root_ca.crt --ca-key $out/root_ca.key
+  '';
 
   # Without this, bench exits with `0` regardless of tests failing
   benchCIVar = "CI=1";
 in
   lib.pipe 256 [
     (lib.range 1)
-    (lib.flip lib.genAttrs' (vmCount: {
-      name = "${toString vmCount}-vms";
+    (lib.flip lib.genAttrs' (nodeCount: {
+      name = "with-${lib.strings.fixedWidthNumber 3 nodeCount}-containers";
       value =
         (nixos-lib.runTest {
           name = "frappe-test-nixos";
-          _file = ./tests.nix;
-          skipLint = true;
-          defaults =
-            defaults
-            // {
-              imports = [
-                nixos.testrig
-                nixos.frappix
-              ];
-            };
           hostPkgs = nixpkgs;
-          nodes = lib.genAttrs' (lib.range 0 (vmCount - 1)) (n: {
-            name = "runner${toString n}";
-            value = {pkgs, ...}: {
-              environment = {
-                systemPackages = [pkgs.bind];
-                variables.SKIP_TESTS = lib.pipe ./skip.nix [
-                  import
-                  (map (test: test.id))
-                  (lib.concatStringsSep ",")
+          containers =
+            {
+              caserver = nixosArgs: {
+                environment.etc.password-file.source = "${test-certificates}/intermediate-password-file";
+                services.step-ca = {
+                  enable = true;
+                  port = 8443;
+                  address = "[::]";
+                  openFirewall = true;
+                  intermediatePasswordFile = "/etc/${nixosArgs.config.environment.etc.password-file.target}";
+                  settings = {
+                    dnsNames = ["caserver"];
+                    root = "${test-certificates}/root_ca.crt";
+                    crt = "${test-certificates}/intermediate_ca.crt";
+                    key = "${test-certificates}/intermediate_ca.key";
+                    db = {
+                      type = "badger";
+                      dataSource = "/var/lib/step-ca/db";
+                    };
+                    authority = {
+                      provisioners = [
+                        {
+                          type = "ACME";
+                          name = "acme";
+                        }
+                      ];
+                    };
+                  };
+                };
+                # systemd.services."step-ca".serviceConfig.ExecStart = lib.mkAfter [" --debug"];
+              };
+            }
+            // lib.genAttrs' (lib.range 0 (nodeCount - 1)) (n: let
+              name = "runner${toString n}";
+            in {
+              inherit name;
+              value = nixosArgs: {
+                imports = [nixos.frappix];
+
+                security = {
+                  # TODO review
+                  sudo = {
+                    enable = true;
+                    wheelNeedsPassword = false;
+                  };
+                  acme = {
+                    defaults = {
+                      server = "https://caserver:8443/acme/acme/directory";
+                      email = "root@example.org";
+                    };
+                    acceptTerms = true;
+                  };
+
+                  pki.certificateFiles = ["${test-certificates}/root_ca.crt"];
+                };
+                networking.firewall.allowedTCPPorts = [
+                  80
+                  443
                 ];
+
+                systemd.services."${nixosArgs.config.services.frappe.project}-config-setup" = {
+                  unitConfig.AssertPathIsReadWrite = lib.mkForce null;
+                  script = let
+                    settingsFormat = pkgs.formats.json {};
+                    commonSiteConfigFile = settingsFormat.generate "common_site_config.json" nixosArgs.config.services.frappe.commonSiteConfig;
+                  in
+                    lib.mkForce
+                    # bash
+                    ''
+                      set -euo pipefail
+                      # some tests need it to be writable, e.g. `test_set_global_conf`
+                      cp -f ${commonSiteConfigFile} ./common_site_config.json
+                      chmod 775 ./common_site_config.json
+                    '';
+                };
+
+                services = {
+                  frappe = {
+                    project = project;
+                    enable = true;
+                    adminPassword = "/etc/${nixosArgs.config.services.frappe.project}/admin-password";
+                    gunicorn_workers = 1;
+                    penv = lib.pipe nixosArgs.config.services.frappe.apps [
+                      (lib.catAttrs "test-dependencies")
+                      lib.flatten
+                      (lib.concat nixosArgs.config.services.frappe.apps)
+                      (extraLibs:
+                        nixosArgs.config.services.frappe.package.pythonModule.buildEnv.override {
+                          inherit extraLibs;
+                        })
+                      lib.mkForce
+                    ];
+
+                    commonSiteConfig = {
+                      default_site = name;
+                      allow_tests = true;
+                      # fake smtp setting for notification / email tests
+                      auto_email_id = "test@example.com";
+                      mail_server = "smtp.example.com";
+                      mail_login = "test@example.com";
+                      mail_password = "test";
+                      server_script_enabled = true;
+                      # not sure about these
+                      monitor = 1;
+                      redis_queue = "unix:///run/redis-${nixosArgs.config.services.frappe.project}-queue/redis.sock";
+                      redis_cache = "unix:///run/redis-${nixosArgs.config.services.frappe.project}-cache/redis.sock";
+                    };
+                    sites.${name} = {
+                      domains = [name];
+                      apps = ["frappe"];
+                    };
+                  };
+                  nginx.virtualHosts.${name} . enableACME = true;
+                };
+
+                nixpkgs = {inherit pkgs;};
+
+                environment = {
+                  etc."${nixosArgs.config.services.frappe.project}/admin-password".text = "admin";
+                  systemPackages = [pkgs.bind];
+                  variables.SKIP_TESTS = lib.pipe ./skip.nix [
+                    import
+                    (map (test: test.id))
+                    (lib.concatStringsSep ",")
+                  ];
+                };
+                networking = {
+                  domain = "test";
+                  hosts."127.0.0.1" = [name];
+                  hostName = "runner${toString n}";
+                };
               };
-              networking = {
-                hosts."127.0.0.1" = [site];
-                hostName = "runner${toString n}";
-              };
-            };
-          });
+            });
 
           testScript =
             # python
             ''
               from concurrent.futures import ThreadPoolExecutor, as_completed
 
-              total_builds = len(machines)
+              caserver.start()
+              test_machines = list(filter(lambda m: m != caserver, machines))
+              total_builds = len(test_machines)
 
               def test(idx, m):
-                with subtest(f"{m}"):
+                with subtest(f"{m.name}"):
                   m.start()
-
                   m.wait_for_unit("${project}.target")
-                  m.wait_until_succeeds('test $(curl -L -o /dev/null -w %{http_code} ${site}) = 200', timeout=10)
+
+                  #caserver.wait_for_unit("step-ca.service")
+                  #caserver.wait_until_succeeds("journalctl -o cat -u step-ca.service | grep '${pkgs.step-ca.version}'")
+
+                  m.wait_for_unit(f"acme-{m.name}.service")
+                  m.wait_until_succeeds(f"test $(curl -v -L -o /dev/null -w %{{http_code}} {m.name}) = 200", timeout=10)
+
+                  pid = m.succeed("systemctl show -p MainPID --value ${project}-web.service").strip()
 
                   stdout = m.succeed(
-                    f"${benchCIVar} bench --verbose run-parallel-tests --build-number {idx+1} --total-builds {total_builds}",
+                    f"${benchCIVar} nsenter --target {pid} --mount bench --verbose run-parallel-tests --build-number {idx+1} --total-builds {total_builds}",
                     timeout=30 * 60 / total_builds
                   )
+
                   print(stdout)
 
               executor = ThreadPoolExecutor()
-              vm_tasks = [executor.submit(test, idx, m) for idx, m in enumerate(machines)]
+              node_tasks = [executor.submit(test, idx, m) for idx, m in enumerate(test_machines)]
 
-              # TODO: fail-fast without "Bad file descriptor" errors
-              for task in as_completed(vm_tasks):
+              for task in as_completed(node_tasks):
                 task.result()
             '';
         })
         // {
-          meta.description = "Run bench tests in parallel across ${toString vmCount} VMs";
+          meta.description = "Run bench tests in parallel across ${toString nodeCount} containers";
         };
     }))
   ]

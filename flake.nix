@@ -48,6 +48,8 @@
       frapper = import ./std/frapper.nix {inherit inputs;};
       nvchecker = import ./std/nvchecker.nix {inherit inputs;};
       templates = std.pick self ["examples" "templates"];
+      checks = std.winnow (n: _: n == "with-004-vms") self ["tests" "nixos-tests"];
+      benchTests = std.harvest self ["tests" "nixos-tests"];
     };
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
