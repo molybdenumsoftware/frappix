@@ -30,7 +30,7 @@ in
         name = "frappe-test-nixos-${name}";
         hostPkgs = pkgs;
         defaults = {
-          nixpkgs = lib.mkForce { inherit pkgs; };
+          nixpkgs = {inherit pkgs;};
         };
         containers =
           {
@@ -63,10 +63,8 @@ in
               };
             };
           }
-          // lib.genAttrs' (lib.range 0 (nodeCount - 1)) (n: let
+          // lib.genAttrs' (lib.range 0 (nodeCount - 1)) (n: {
             name = "runner${toString n}";
-          in {
-            inherit name;
             value = nixosArgs: {
               imports = [nixos.frappix];
 
@@ -109,7 +107,7 @@ in
                   gunicorn_workers = 1;
                   includeTestDeps = true;
                   commonSiteConfig = {
-                    default_site = name;
+                    default_site = nixosArgs.config.networking.hostName;
                     allow_tests = true;
                     # fake smtp setting for notification / email tests
                     auto_email_id = "test@example.com";
@@ -117,34 +115,27 @@ in
                     mail_login = "test@example.com";
                     mail_password = "test";
                     server_script_enabled = true;
+
                     # not sure about these
                     monitor = 1;
                     redis_queue = "unix:///run/redis-${nixosArgs.config.services.frappe.project}-queue/redis.sock";
                     redis_cache = "unix:///run/redis-${nixosArgs.config.services.frappe.project}-cache/redis.sock";
                   };
-                  sites.${name} = {
-                    domains = [name];
+                  sites.${nixosArgs.config.networking.hostName} = {
+                    domains = [nixosArgs.config.networking.hostName];
                     apps = ["frappe"];
                   };
                 };
-                nginx.virtualHosts.${name} . enableACME = true;
+                nginx.virtualHosts.${nixosArgs.config.networking.hostName}.enableACME = true;
               };
-
-              nixpkgs = {inherit pkgs;};
 
               environment = {
                 etc."${nixosArgs.config.services.frappe.project}/admin-password".text = "admin";
-                systemPackages = [pkgs.bind];
                 variables.SKIP_TESTS = lib.pipe ./skip.nix [
                   import
                   (map (test: test.id))
                   (lib.concatStringsSep ",")
                 ];
-              };
-              networking = {
-                domain = "test";
-                hosts."127.0.0.1" = [name];
-                hostName = "runner${toString n}";
               };
             };
           });
@@ -162,13 +153,8 @@ in
               with subtest(f"{m.name}"):
                 m.start()
                 m.wait_for_unit("${project}.target")
-
-                #caserver.wait_for_unit("step-ca.service")
-                #caserver.wait_until_succeeds("journalctl -o cat -u step-ca.service | grep '${pkgs.step-ca.version}'")
-
                 m.wait_for_unit(f"acme-{m.name}.service")
                 m.wait_until_succeeds(f"test $(curl -v -L -o /dev/null -w %{{http_code}} {m.name}) = 200", timeout=10)
-
                 pid = m.succeed("systemctl show -p MainPID --value ${project}-web.service").strip()
 
                 stdout = m.succeed(
