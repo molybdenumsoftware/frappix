@@ -52,9 +52,7 @@ let
           passthru = (attrs.passthru or {}) // {inherit workdirsrc;};
         };
     }
-    .${
-      name
-    }
+    .${name}
     or attrs;
 in
   lib.mapAttrs applyInputPatches (lib.mapAttrs' sanitizeKey (sourceDirectoryEntries ./sources))
