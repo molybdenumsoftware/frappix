@@ -71,11 +71,6 @@ in
               imports = [nixos.frappix];
 
               security = {
-                # TODO review
-                # sudo = {
-                #   enable = true;
-                #   wheelNeedsPassword = false;
-                # };
                 acme = {
                   defaults = {
                     server = "https://caserver:8443/acme/acme/directory";
@@ -88,7 +83,6 @@ in
               };
               networking.firewall.allowedTCPPorts = [
                 80
-                443
               ];
 
               systemd.services."${nixosArgs.config.services.frappe.project}-config-setup" = {
@@ -109,21 +103,11 @@ in
 
               services = {
                 frappe = {
-                  project = project;
+                  inherit project;
                   enable = true;
                   adminPassword = "/etc/${nixosArgs.config.services.frappe.project}/admin-password";
                   gunicorn_workers = 1;
-                  penv = lib.pipe nixosArgs.config.services.frappe.apps [
-                    (lib.catAttrs "test-dependencies")
-                    lib.flatten
-                    (lib.concat nixosArgs.config.services.frappe.apps)
-                    (extraLibs:
-                      nixosArgs.config.services.frappe.package.pythonModule.buildEnv.override {
-                        inherit extraLibs;
-                      })
-                    lib.mkForce
-                  ];
-
+                  includeTestDeps = true;
                   commonSiteConfig = {
                     default_site = name;
                     allow_tests = true;
