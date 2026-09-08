@@ -35,14 +35,10 @@ let
               frappe = workdirsrc;
             })
             ./sources/frappe-skip-tests.patch
-            ./sources/frappe-test-timeout-override.patch
-
-            # not possible because source is a link to the nix store
-            # cannot be skipped by test id because it throws in `setUpClass`
             ./sources/frappe-skip-doctype-tests-that-write-to-source.patch
-
             # this test does not inherit the class that we're patching to support test skipping
             ./sources/frappe-skip-test-password-strength.patch
+            ./sources/frappe-test-timeout-override.patch
           ];
         };
       in
@@ -52,9 +48,7 @@ let
           passthru = (attrs.passthru or {}) // {inherit workdirsrc;};
         };
     }
-    .${
-      name
-    }
+    .${name}
     or attrs;
 in
   lib.mapAttrs applyInputPatches (lib.mapAttrs' sanitizeKey (sourceDirectoryEntries ./sources))
