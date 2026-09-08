@@ -30,7 +30,7 @@ in
         name = "frappe-test-nixos-${name}";
         hostPkgs = pkgs;
         defaults = {
-          nixpkgs = { inherit pkgs; };
+          nixpkgs = lib.mkForce { inherit pkgs; };
         };
         containers =
           {
