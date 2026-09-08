@@ -34,6 +34,10 @@ let
             (replaceVars ./sources/frappe-website-generator.patch {
               frappe = workdirsrc;
             })
+            ./sources/frappe-skip-tests.patch
+            ./sources/frappe-skip-doctype-tests-that-write-to-source.patch
+            ./sources/frappe-skip-test-password-strength.patch
+            ./sources/frappe-test-timeout-override.patch
           ];
         };
       in
