@@ -125,6 +125,11 @@ in
                     domains = [nixosArgs.config.networking.hostName];
                     apps = ["frappe"];
                   };
+                  environment = {
+                    # It seems that system trust does not suffice for Python.
+                    # And even though this literally has "CURL" in it, it seems to do the trick for Python 🤷🏼‍♂️
+                    CURL_CA_BUNDLE = nixosArgs.config.security.pki.caBundle;
+                  };
                 };
                 nginx.virtualHosts.${nixosArgs.config.networking.hostName}.enableACME = true;
               };
