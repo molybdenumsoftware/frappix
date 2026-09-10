@@ -8916,4 +8916,21 @@
     #     raise frappe.PermissionError
     # frappe.exceptions.PermissionError
   }
+  {
+    id = "frappe.integrations.doctype.connected_app.test_connected_app.TestConnectedApp.test_web_application_flow";
+
+    # runner2 # [12629.876337] runner2 nginx[639]: 2026/09/10 05:59:29 [error] 639#639: *5 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 2001:db8:1::4, server: runner2, request: "GET /api/method/frappe.integrations.doctype.connected_app.connected_app.callback/gutej6moku?code=lueX0jdsVEA9XKTARPvOJFoMCsH8iL&state=vtCIHA1Os4WXqi4sjyANw425Nmrs8f HTTP/1.1", upstream: "http://unix:/run/TestProject/web/gunicorn.socket/api/method/frappe.integrations.doctype.connected_app.connected_app.callback/gutej6moku?code=lueX0jdsVEA9XKTARPvOJFoMCsH8iL&state=vtCIHA1Os4WXqi4sjyANw425Nmrs8f", host: "runner2"
+    # runner2 # [12629.876676] runner2 nginx[639]: 2026/09/10 05:59:29 [error] 639#639: *9 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 127.0.0.1, server: runner2, request: "POST /api/method/frappe.integrations.oauth2.get_token HTTP/1.1", upstream: "http://unix:/run/TestProject/web/gunicorn.socket/api/method/frappe.integrations.oauth2.get_token", host: "runner2"
+    # runner2 # [12629.970752] runner2 TestProject-web-start[421]: 2026-09-10 05:59:29,820 ERROR frappe New Exception collected in error log
+    # runner2 # [12629.970752] runner2 TestProject-web-start[421]: Site: runner2
+    # runner2 # [12629.970752] runner2 TestProject-web-start[421]: Form Dict: {'code': 'lueX0jdsVEA9XKTARPvOJFoMCsH8iL', 'state': 'vtCIHA1Os4WXqi4sjyANw425Nmrs8f', 'cmd': 'frappe.integrations.doctype.connected_app.connected_app.callback'}
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]: /nix/store/4yigqkbm3z9z4djgg5pb5q95vbzvkw5d-python3-3.14.7-env/lib/python3.14/site-packages/frappe/utils/html_utils.py:163: MarkupResemblesLocatorWarning: The input passed in on this line looks more like a URL than HTML or XML.
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]: If you meant to use Beautiful Soup to parse the web page found at a certain URL, then something has gone wrong. You should use an Python package like 'requests' to fetch the content behind the URL. Once you have the content as a string, you can feed that string into Beautiful Soup.
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]: However, if you want to parse some data that happens to look like a URL, then nothing has gone wrong: you are using Beautiful Soup correctly, and this warning is spurious and can be filtered. To make this warning go away, run this code before calling the BeautifulSoup constructor:
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]:     from bs4 import MarkupResemblesLocatorWarning
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]:     import warnings
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]:     warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]:
+    # runner2 # [12629.992404] runner2 TestProject-web-start[421]:   if not bool(BeautifulSoup(html, "html.parser").find()):
+  }
 ]
