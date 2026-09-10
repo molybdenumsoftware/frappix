@@ -36,17 +36,6 @@ frappe.integrations.doctype.connected_app.test_connected_app.TestConnectedApp
 - ✖ test_web_application_flow: `frappe.exceptions.LinkExistsError: Cannot delete or cancel because Connected App ad608f3281 is linked with Token Cache ad608f3281-test-connected-app@example.com`
 - ✖ test_web_application_flow: `AssertionError: 500 != 200`
 
-frappe.tests.test_commands.TestBenchBuild
-
-- ✖ test_build_assets_size_check: `AssertionError: 1 != 0`
-
-```console
-Last Command Execution Summary:
-Command: <Command build>
-
-
-Return Code: 1
-```
 
 frappe.tests.test_oauth20.TestOAuth20
 
