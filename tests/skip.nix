@@ -2080,6 +2080,8 @@
   }
   {
     id = "frappe.tests.test_utils.TestAppParser.test_app_name_parser";
+    # It seems that this test expects a git repo
+    #
     # Traceback (most recent call last):
     #   File "/nix/store/4zmkmy6yph6rik6iwix0nl4samlxmca6-python3-3.13.13-env/lib/python3.13/site-packages/frappe/installer.py", line 232, in fetch_details_from_tag
     #     org, repo = org_repo
